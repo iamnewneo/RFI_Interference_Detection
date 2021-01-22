@@ -13,11 +13,11 @@ class RFIModel(pl.LightningModule):
         self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
         self.conv2 = nn.Conv2d(16, 32, 3, padding=1)
         self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
+        self.conv4 = nn.Conv2d(64, 128, 3, padding=1)
         self.maxpool = nn.AdaptiveMaxPool2d(pool_size)
-        self.fc1 = nn.Linear(64 * pool_size[0] * pool_size[1], 500)
-        self.fc2 = nn.Linear(500, self.n_classes)
-        self.softmax = nn.Softmax(dim=1)
-        self.accuracy = pl.metrics.Accuracy()
+        self.fc1 = nn.Linear(128 * pool_size[0] * pool_size[1], 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, self.n_classes)
         self.train_accuracy = pl.metrics.Accuracy()
         self.valid_accuracy = pl.metrics.Accuracy()
 
@@ -44,7 +44,7 @@ class RFIModel(pl.LightningModule):
         images = images.permute(0, 3, 1, 2)
 
         targets = batch["target"]
-        targets = targets.type(torch.LongTensor)
+        targets = targets.type(torch.LongTensor).to(config.DEVICE)
 
         out = self(images)
         loss = self.loss_fn(out, targets)
@@ -58,13 +58,13 @@ class RFIModel(pl.LightningModule):
         images = images.permute(0, 3, 1, 2)
 
         targets = batch["target"]
-        targets = targets.type(torch.LongTensor)
+        targets = targets.type(torch.LongTensor).to(config.DEVICE)
 
         out = self(images)
         loss = self.loss_fn(out, targets)
         accuracy = self.valid_accuracy(out, targets)
         self.log("val_loss", loss, prog_bar=True)
-        # self.log("val_acc", accuracy, prog_bar=True)
+        self.log("val_acc", accuracy, prog_bar=True)
         return loss, accuracy
 
     def validation_epoch_end(self, val_step_outputs):

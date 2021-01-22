@@ -15,11 +15,12 @@ def main():
     df = pd.read_csv(f"{config.BASE_PATH}/data/train_folds.csv")
 
     for k_fold in range(k_folds):
+        print(f"Fold No: {k_fold}")
         df_train = df[df.kfold != k_fold].reset_index(drop=True)
         df_val = df[df.kfold != k_fold].reset_index(drop=True)
 
         train_loader = create_data_loader(df_train, batch_size=config.BATCH_SIZE)
-        val_loader = create_data_loader(df_train, batch_size=config.BATCH_SIZE)
+        val_loader = create_data_loader(df_val, batch_size=config.BATCH_SIZE)
 
         model_trainer(train_loader, val_loader)
 
