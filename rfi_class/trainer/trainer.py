@@ -11,10 +11,11 @@ def model_trainer(train_dataloader, val_dataloader):
     )
     model = RFIModel().to(device)
     trainer = pl.Trainer(
-        max_epochs=2,
+        max_epochs=config.MAX_EPOCHS,
         min_epochs=1,
         callbacks=[early_stop_callback],
         weights_summary=None,
+        progress_bar_refresh_rate=21,
     )
     trainer.fit(model, train_dataloader, val_dataloader)
 

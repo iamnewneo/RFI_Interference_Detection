@@ -6,3 +6,4 @@ SEED = 42
 BASE_PATH = os.getenv("BASE_PATH", ".")
 DEVICE = "cpu"
 BATCH_SIZE = 4
+MAX_EPOCHS = 10
