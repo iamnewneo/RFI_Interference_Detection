@@ -18,6 +18,7 @@ class RFIModel(pl.LightningModule):
         self.fc1 = nn.Linear(128 * pool_size[0] * pool_size[1], 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, self.n_classes)
+        self.accuracy = pl.metrics.Accuracy()
         self.train_accuracy = pl.metrics.Accuracy()
         self.valid_accuracy = pl.metrics.Accuracy()
 
@@ -25,10 +26,12 @@ class RFIModel(pl.LightningModule):
         out = F.relu(self.conv1(x))
         out = F.relu(self.conv2(out))
         out = F.relu(self.conv3(out))
+        out = F.relu(self.conv4(out))
         out = self.maxpool(out)
         out = out.view(out.size(0), -1)
         out = self.fc1(out)
         out = self.fc2(out)
+        out = self.fc3(out)
         return out
 
     def loss_fn(self, out, target):

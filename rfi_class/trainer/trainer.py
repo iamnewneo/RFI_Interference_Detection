@@ -11,7 +11,7 @@ def model_trainer(train_dataloader, val_dataloader):
     )
     model = RFIModel()
     gpus = None
-    if config.DEVICE == "gpu":
+    if config.DEVICE in ["gpu", "cuda", "cuda:0"]:
         gpus = 1
     trainer = pl.Trainer(
         gpus=gpus,
