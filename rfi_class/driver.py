@@ -14,14 +14,14 @@ def main():
     k_folds = config.N_FOLDS
 
     df = pd.read_csv(f"{config.BASE_PATH}/data/train_folds.csv")
-    df_test = pd.read_csv(f"{config.BASE_PATH}/data/test.csv").head(50)
+    df_test = pd.read_csv(f"{config.BASE_PATH}/data/test.csv")
 
     test_loader = create_data_loader(df_test, batch_size=config.BATCH_SIZE)
 
     for k_fold in range(k_folds):
         print(f"Running Fold No: {k_fold}")
-        df_train = df[df.kfold != k_fold].reset_index(drop=True).head(10)
-        df_val = df[df.kfold != k_fold].reset_index(drop=True).head(10)
+        df_train = df[df.kfold != k_fold].reset_index(drop=True)
+        df_val = df[df.kfold != k_fold].reset_index(drop=True)
 
         train_loader = create_data_loader(df_train, batch_size=config.BATCH_SIZE)
         val_loader = create_data_loader(df_val, batch_size=config.BATCH_SIZE)
