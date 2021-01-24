@@ -2,7 +2,6 @@ import glob
 import pandas as pd
 from pathlib import Path
 from rfi_class import config
-from rfi_class.utils.util import get_base_path
 from sklearn.model_selection import train_test_split, StratifiedKFold
 
 
