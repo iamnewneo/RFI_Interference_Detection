@@ -26,7 +26,9 @@ def main():
         train_loader = create_data_loader(df_train, batch_size=config.BATCH_SIZE)
         val_loader = create_data_loader(df_val, batch_size=config.BATCH_SIZE)
 
-        trainer = model_trainer(train_loader, val_loader, progress_bar_refresh_rate=0)
+        trainer = model_trainer(
+            train_loader, val_loader, progress_bar_refresh_rate=0, pretrained=True
+        )
         model = trainer.get_model()
         result = evaluate_model(model, data_loader=test_loader)
         print(f"Fold {k_fold} Test Loss: {result['loss']:.2f}")
