@@ -6,6 +6,80 @@ import pytorch_lightning as pl
 from torchvision import models
 
 
+class RFIModelPretrained(pl.LightningModule):
+    def __init__(self):
+        super(RFIModelPretrained, self).__init__()
+        n_classes = len(config.CLASSES)
+        self.n_classes = n_classes
+        model = models.resnet18(pretrained=True)
+        for param in model.parameters():
+            param.requires_grad = False
+        n_inputs = model.fc.in_features
+        model.fc = nn.Sequential(
+            nn.Linear(n_inputs, 256),
+            nn.ReLU(),
+            nn.Dropout(0.4),
+            nn.Linear(256, n_classes),
+            nn.LogSoftmax(dim=1),
+        )
+        self.model = model
+        self.accuracy = pl.metrics.Accuracy()
+        self.train_accuracy = pl.metrics.Accuracy()
+        self.valid_accuracy = pl.metrics.Accuracy()
+
+    def forward(self, x):
+        out = self.model(x)
+        return out
+
+    def loss_fn(self, out, target):
+        return nn.CrossEntropyLoss()(out.view(-1, self.n_classes), target)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.AdamW(self.model.parameters())
+        return optimizer
+
+    def training_step(self, batch, batch_idx):
+        images = batch["image"]
+        images = images.permute(0, 3, 1, 2)
+
+        targets = batch["target"]
+        targets = targets.type(torch.LongTensor).to(config.DEVICE)
+
+        out = self(images)
+        loss = self.loss_fn(out, targets)
+        accuracy = self.train_accuracy(out, targets)
+        self.log("train_loss", loss, prog_bar=True)
+        self.log("train_acc", accuracy, prog_bar=True)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        images = batch["image"]
+        images = images.permute(0, 3, 1, 2)
+
+        targets = batch["target"]
+        targets = targets.type(torch.LongTensor).to(config.DEVICE)
+
+        out = self(images)
+        loss = self.loss_fn(out, targets)
+        accuracy = self.valid_accuracy(out, targets)
+        self.log("val_loss", loss, prog_bar=True)
+        self.log("val_acc", accuracy, prog_bar=True)
+        return loss, accuracy
+
+    def training_epoch_end(self, train_step_outputs):
+        avg_val_loss = torch.tensor([x["loss"] for x in train_step_outputs]).mean()
+        print(f"Train Loss: {avg_val_loss:.2f}")
+
+    def validation_epoch_end(self, val_step_outputs):
+        if not self.trainer.running_sanity_check:
+            avg_val_loss = torch.tensor([x[0] for x in val_step_outputs]).mean()
+            avg_val_acc = torch.tensor([x[1] for x in val_step_outputs]).mean()
+            print(
+                f"Epoch: {self.current_epoch} Val Acc: {avg_val_acc:.2f} Val Loss: {avg_val_loss:.2f} ",
+                end="",
+            )
+
+
 class RFIModel(pl.LightningModule):
     def __init__(self):
         super(RFIModel, self).__init__()

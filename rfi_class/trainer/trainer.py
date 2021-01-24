@@ -1,15 +1,20 @@
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
 from rfi_class import config
-from rfi_class.model.model import RFIModel
+from rfi_class.model.model import RFIModel, RFIModelPretrained
 
 
-def model_trainer(train_dataloader, val_dataloader, progress_bar_refresh_rate):
+def model_trainer(
+    train_dataloader, val_dataloader, progress_bar_refresh_rate, pretrained=False
+):
     device = config.DEVICE
     early_stop_callback = EarlyStopping(
         monitor="val_loss", min_delta=0.00, patience=5, mode="auto"
     )
-    model = RFIModel()
+    if pretrained:
+        model = RFIModelPretrained()
+    else:
+        model = RFIModel()
     gpus = None
     if config.DEVICE in ["gpu", "cuda", "cuda:0"]:
         gpus = 1
