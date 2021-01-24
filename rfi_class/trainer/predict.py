@@ -26,7 +26,7 @@ def evaluate_model(model, data_loader):
         ids = batch["id"]
 
         targets = batch["target"]
-        targets = targets.type(torch.LongTensor).to(config.DEVICE)
+        targets = targets.type(torch.LongTensor)
 
         model = model.to(config.DEVICE)
         out = model(images)
