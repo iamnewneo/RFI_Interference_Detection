@@ -21,19 +21,23 @@ def evaluate_model(model, data_loader):
     for batch in data_loader:
         images = batch["image"]
         images = images.permute(0, 3, 1, 2)
+        images = images.to(config.DEVICE)
 
         ids = batch["id"]
 
         targets = batch["target"]
         targets = targets.type(torch.LongTensor).to(config.DEVICE)
 
+        model = model.to(config.DEVICE)
         out = model(images)
+        out = out.to("cpu")
         loss = loss_fn(out, targets)
         _, predicted = torch.max(out.data, 1)
 
         all_targets = torch.cat((all_targets, targets), axis=0)
         all_predictions = torch.cat((all_predictions, predicted), axis=0)
-        all_losses = torch.cat((all_losses, torch.FloatTensor([loss])), axis=0)
+        loss_tensor = torch.FloatTensor([loss.item()])
+        all_losses = torch.cat((all_losses, loss_tensor), axis=0)
         all_ids = all_ids + ids
 
     overall_acc = test_accuracy(all_predictions, all_targets)
