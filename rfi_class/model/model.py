@@ -132,7 +132,7 @@ class RFIModel(pl.LightningModule):
         return nn.CrossEntropyLoss()(out.view(-1, self.n_classes), target)
 
     def configure_optimizers(self):
-        LR = 1e-3
+        LR = config.LR
         optimizer = torch.optim.AdamW(self.parameters(), lr=LR)
         return optimizer
 

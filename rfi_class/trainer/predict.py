@@ -12,16 +12,14 @@ def loss_fn(out, target):
 
 
 def evaluate_model(model, data_loader):
-    test_accuracy = pl.metrics.Accuracy()
     all_ids = []
-    all_losses = torch.FloatTensor([])
-    all_targets = torch.FloatTensor([])
     all_predictions = torch.FloatTensor([])
 
     model = model.to(config.DEVICE)
     result = {}
     total = 0
     correct = 0
+    total_loss = 0
     for batch in data_loader:
         images = batch["image"]
         images = images.permute(0, 3, 1, 2)
@@ -39,17 +37,16 @@ def evaluate_model(model, data_loader):
 
             total += targets.size(0)
             correct += (predicted == targets).sum().item()
+            total_loss += loss.item()
             # print(
             #     f"Batch Loss: {loss} Batch Accuracy: {test_accuracy(predicted, targets)}"
             # )
 
             all_predictions = torch.cat((all_predictions, predicted), axis=0)
-            loss_tensor = torch.FloatTensor([loss.item()])
-            all_losses = torch.cat((all_losses, loss_tensor), axis=0)
             all_ids = all_ids + ids
 
     result["ids"] = all_ids
     result["predictions"] = all_predictions
     result["accuracy"] = (correct * 100) / total
-    result["loss"] = all_losses.mean()
+    result["loss"] = total_loss / len(data_loader)
     return result
