@@ -4,6 +4,7 @@ from rfi_class.preprocessing.create_dataset import create_dataset, create_folds
 from rfi_class.trainer.trainer import model_trainer
 from rfi_class.data_loader.data_loader import create_data_loader
 from rfi_class.trainer.predict import evaluate_model
+from rfi_class.utils.util import get_confusion_matrix
 
 
 def main():
@@ -33,10 +34,14 @@ def main():
         result = evaluate_model(model, data_loader=test_loader)
         print(f"Fold {k_fold} Test Loss: {result['loss']:.2f}")
         print(f"Fold {k_fold} Test Accuracy: {result['accuracy']:.2f}")
+        confusion_matrix = get_confusion_matrix(
+            result["targets"], result["predictions"]
+        )
 
         del model
         del trainer
         del result
+        break
 
 
 if __name__ == "__main__":
